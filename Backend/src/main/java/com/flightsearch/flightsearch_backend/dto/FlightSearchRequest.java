@@ -8,6 +8,7 @@ public class FlightSearchRequest {
   private String arrivalAirport;
   private String departureDate;
   private String returnDate;
+  private int numberOfAdults;
   private String currencyCode;
-  private boolean nonStop;
+  private Boolean nonStop;
 }

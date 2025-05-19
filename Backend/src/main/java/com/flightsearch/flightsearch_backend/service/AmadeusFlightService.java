@@ -3,10 +3,6 @@ import com.flightsearch.flightsearch_backend.service.AmadeusAuthService;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,9 +11,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import com.flightsearch.flightsearch_backend.dto.AmadeusFlightRequest;
-import com.flightsearch.flightsearch_backend.dto.AmadeusFlightRequest.DepartureDateTimeRange;
+// import com.flightsearch.flightsearch_backend.dto.AmadeusFlightRequest;
+// import com.flightsearch.flightsearch_backend.dto.AmadeusFlightRequest.DepartureDateTimeRange;
 import com.flightsearch.flightsearch_backend.dto.FlightSearchRequest;
 
 @Slf4j
@@ -31,36 +28,46 @@ public class AmadeusFlightService {
     String accessToken = amadeusAuthService.getAccessToken();
     String url = "https://test.api.amadeus.com/v2/shopping/flight-offers";
 
-    String currentTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+    if (request.getDepartureAirport() == null || request.getArrivalAirport() == null || request.getDepartureDate() == null) {
+      throw new IllegalArgumentException("Los campos obligatorios no pueden ser nulos: departureAirport, arrivalAirport, departureDate");
+    }
 
-    AmadeusFlightRequest.DepartureDateTimeRange departureDateTimeRange = new DepartureDateTimeRange(request.getDepartureDate(), currentTime);
-    AmadeusFlightRequest.OriginDestination originDestination = new AmadeusFlightRequest.OriginDestination("1", request.getDepartureAirport(), request.getArrivalAirport(), departureDateTimeRange);
-    AmadeusFlightRequest.Traveler traveler = new AmadeusFlightRequest.Traveler("1", "ADULT");
-    AmadeusFlightRequest.CabinRestriction cabinRestriction = new AmadeusFlightRequest.CabinRestriction("ECONOMY", "MOST_SEGMENTS", List.of("1"));
-    AmadeusFlightRequest.FlightFilters flightFilters = new AmadeusFlightRequest.FlightFilters(List.of(cabinRestriction));
-    AmadeusFlightRequest.SearchCriteria searchCriteria = new AmadeusFlightRequest.SearchCriteria(10, flightFilters);
+    UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url)
+      .queryParam("originLocationCode", request.getDepartureAirport())
+      .queryParam("destinationLocationCode", request.getArrivalAirport())
+      .queryParam("departureDate", request.getDepartureDate());
+
+      int adults = request.getNumberOfAdults();
+      if (adults <= 0) {
+        adults = 1;
+      }
+      builder.queryParam("adults", adults);
+
+      if (request.getReturnDate() != null && !request.getReturnDate().isEmpty()) {
+        builder.queryParam("returnDate", request.getReturnDate());
+      }
+
+      if (request.getCurrencyCode() != null && !request.getCurrencyCode().isEmpty()) {
+        builder.queryParam("currencyCode", request.getCurrencyCode());
+      } else {
+        builder.queryParam("currencyCode", "USD");
+      }
     
-    AmadeusFlightRequest flightRequest = new AmadeusFlightRequest(
-      "USD",
-      List.of(originDestination),
-      List.of(traveler),
-      List.of("GDS"),
-      searchCriteria
-    );
+      if (request.getNonStop() != null) {
+        builder.queryParam("nonStop", request.getNonStop());
+      }
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(accessToken);
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.set("X-HTTP-Method-Override", "GET");
+    headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
     
-    HttpEntity<AmadeusFlightRequest> entity = new HttpEntity<>(flightRequest, headers);
-    
+    HttpEntity<String> entity = new HttpEntity<>(headers);
     RestTemplate restTemplate = new RestTemplate();
 
     try {
       ResponseEntity<String> response = restTemplate.exchange(
-        url,
-        HttpMethod.POST,
+        builder.toUriString(),
+        HttpMethod.GET,
         entity,
         String.class
       );
