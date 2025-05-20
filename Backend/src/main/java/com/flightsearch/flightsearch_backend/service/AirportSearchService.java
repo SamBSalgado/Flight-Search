@@ -1,5 +1,8 @@
 package com.flightsearch.flightsearch_backend.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -9,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +55,27 @@ public class AirportSearchService {
       );
 
       if (response.getStatusCode().is2xxSuccessful()) {
-        return response.getBody();
+        String responseBody = response.getBody();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode root = objectMapper.readTree(responseBody);
+
+        JsonNode dataArray = root.path("data");
+
+        if (!dataArray.isArray()) {
+          throw new RuntimeException("Respuesta inesperada de Amadeus");
+        }
+
+        List<String> results = new ArrayList<>();
+        for(JsonNode airport : dataArray) {
+          String iataCode = airport.path("iataCode").asText();
+          String name = airport.path("name").asText();
+          if (iataCode != null && !iataCode.isEmpty() && name != null && !name.isEmpty()) {
+            results.add(iataCode + " (" + name + ")");
+          }
+        }
+
+        return objectMapper.writeValueAsString(results);
       } else {
         log.error("Error al buscar aeropuertos. Código: {}", response.getStatusCode());
         throw new RuntimeException("Error al buscar aeropuertos en Amadeus");
