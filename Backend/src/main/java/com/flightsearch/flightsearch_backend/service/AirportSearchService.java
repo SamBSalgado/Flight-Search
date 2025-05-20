@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -33,6 +34,7 @@ public class AirportSearchService {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(accessToken);
+    headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
 
     HttpEntity<String> entity = new HttpEntity<>(headers);
 
