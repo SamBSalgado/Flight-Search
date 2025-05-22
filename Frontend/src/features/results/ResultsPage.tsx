@@ -12,10 +12,9 @@ export const ResultsPage = () => {
 
   return(
     <div>
+      <button onClick={() => navigate('/')}>Return to Search</button>
       <h1>Flight Results</h1>
       <pre>{JSON.stringify(results, null, 2)}</pre>
-
-      <button onClick={() => navigate('/')}>Return to Search</button>
     </div>
   );
 };
