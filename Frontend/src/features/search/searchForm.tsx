@@ -166,28 +166,74 @@ export const SearchForm = () => {
       [name]: value,
     });
   };
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Actualizar los códigos de aeropuerto en el form antes de enviar
-    const updatedForm = {
-      ...form,
-      departureAirport: departureQuery,
-      arrivalAirport: arrivalQuery,
-    };
-    
-    dispatch(setSearchParams(updatedForm));
 
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  // Actualizar los códigos de aeropuerto en el form antes de enviar
+  const updatedForm = {
+    ...form,
+    departureAirport: departureQuery,
+    arrivalAirport: arrivalQuery,
+  };
+  
+  dispatch(setSearchParams(updatedForm));
+
+  try {
     const response = await fetch('http://localhost:8080/buscar-vuelos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedForm),
     });
+    
     const data = await response.json();
+    
+    // DEBUGGING: Logs para ver qué devuelve el backend
+    console.log('Response from backend:', data);
+    console.log('Type of data:', typeof data);
+    console.log('Is data an array?', Array.isArray(data));
+    console.log('Data keys (if object):', typeof data === 'object' ? Object.keys(data) : 'Not an object');
 
-    dispatch(setSearchResults(data));
+    // Verificar si la respuesta es exitosa
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    // Extraer el array de vuelos correctamente según la estructura de tu API
+    let flightResults = [];
+    
+    if (Array.isArray(data)) {
+      // Si data es directamente un array
+      flightResults = data;
+    } else if (data && data.data && Array.isArray(data.data)) {
+      // Si está en data.data
+      flightResults = data.data;
+    } else if (data && data.flights && Array.isArray(data.flights)) {
+      // Si está en data.flights
+      flightResults = data.flights;
+    } else if (data && data.offers && Array.isArray(data.offers)) {
+      // Si está en data.offers
+      flightResults = data.offers;
+    } else {
+      // Si no encontramos un array, usar array vacío
+      console.warn('No flight array found in response, using empty array');
+      flightResults = [];
+    }
+
+    console.log('Final flight results to dispatch:', flightResults);
+    console.log('Number of flights:', flightResults.length);
+
+    dispatch(setSearchResults(flightResults));
     navigate('/results');
-  };
+    
+  } catch (error) {
+    console.error('Error searching flights:', error);
+    // Opcional: dispatch un array vacío en caso de error
+    dispatch(setSearchResults([]));
+    // Opcional: mostrar un mensaje de error al usuario
+    alert('Error searching flights. Please try again.');
+  }
+};
 
   return (
     <div className="search-form-container">
