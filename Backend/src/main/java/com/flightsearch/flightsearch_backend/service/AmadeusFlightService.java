@@ -57,14 +57,6 @@ public class AmadeusFlightService {
         builder.queryParam("nonStop", request.getNonStop());
       }
 
-      if (request.getPageLimit() != null) {
-        builder.queryParam("page[limit]", request.getPageLimit());
-      }
-
-      if (request.getPageOffset() != null) {
-        builder.queryParam("page[offset]", request.getPageOffset());
-      }
-
     HttpHeaders headers = new HttpHeaders();
     headers.setBearerAuth(accessToken);
     headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));

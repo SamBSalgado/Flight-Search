@@ -11,7 +11,4 @@ public class FlightSearchRequest {
   private int numberOfAdults;
   private String currencyCode;
   private Boolean nonStop;
-
-  private Integer pageLimit;
-  private Integer pageOffset;
 }
