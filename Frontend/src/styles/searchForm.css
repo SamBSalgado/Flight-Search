@@ -1,0 +1,330 @@
+/* Estilos para el autocompletado de aeropuertos */
+#title {
+  color: #000;
+  align-items: center;
+  justify-content: center;
+}
+
+label {
+  color: #000;
+}
+
+ul {
+  color: #000;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+
+input[type="text"],
+input {
+  background-color: white;   /* Asegura fondo visible */
+  color: black;              /* Asegura texto visible */
+  caret-color: black;        /* Asegura el color del cursor */
+  font-size: 16px;           /* Que no sea 0 */
+  border: 1px solid #ccc;    /* Para que se vea el input */
+  padding: 8px;
+  border-radius: 4px;
+}
+
+
+#departureDate, #returnDate {
+  background-color: #fff;
+  color: #707070;
+}
+
+#currency {
+  color: #000;
+}
+
+
+.airport-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.suggestion-item {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.suggestion-item:hover {
+  background-color: #f5f5f5;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.airport-location {
+  color: #666;
+  font-size: 12px;
+}
+
+.loading-indicator {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #666;
+}
+
+/* Estilos para los controles de pasajeros */
+.passengers-section {
+  grid-column: span 2;
+}
+
+.passengers-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.passenger-type {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.passenger-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.passenger-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.passenger-description {
+  font-size: 12px;
+  color: #666;
+}
+
+.counter-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.counter-btn {
+  color: #000;
+  font-weight: 100;
+  width: 35px;
+  height: 35px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.counter-btn:hover:not(:disabled) {
+  background-color: #f0f0f0;
+  border-color: #999;
+}
+
+.counter-btn:disabled {
+  background-color: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+  border-color: #e0e0e0;
+}
+
+.counter-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  min-width: 20px;
+  text-align: center;
+}
+
+.passengers-summary {
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+/* searchForm.css */
+.search-form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.flight-search-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-size: 14px;
+  text-align: right;
+  margin-right: 10px;
+}
+
+input, select {
+  padding: 8px 10px;
+  border: 1px solid #383636;
+  background-color: #ffffff;
+  border-radius: 2px;
+  font-size: 16px;
+  height: 40px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  color: #333;
+}
+
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  height: auto;
+  margin-right: 5px;
+}
+
+.checkbox-group label {
+  margin: 0;
+  text-align: left;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.search-button {
+  padding: 10px 30px;
+  background-color: #ccc;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #000;
+}
+
+.search-button:hover {
+  background-color: #bbb;
+}
+
+/* Responsive layout para pantallas más grandes */
+@media (min-width: 768px) {
+  .flight-search-form {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    align-items: center;
+    gap: 15px 0;
+  }
+
+  .form-group {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    align-items: center;
+  }
+
+  .form-group label {
+    margin-bottom: 0;
+  }
+
+  .button-group {
+    grid-column: 2;
+    justify-content: flex-end;
+  }
+
+  /* Ajustes específicos para la sección de pasajeros en desktop */
+  .passengers-section {
+    align-items: flex-start;
+  }
+
+  .passengers-section label {
+    margin-top: 15px;
+  }
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 767px) {
+  .passengers-controls {
+    padding: 10px;
+  }
+  
+  .passenger-type {
+    padding: 8px 0;
+  }
+  
+  .counter-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+  
+  .counter-controls {
+    gap: 10px;
+  }
+}
