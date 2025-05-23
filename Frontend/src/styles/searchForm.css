@@ -39,34 +39,6 @@ input {
   color: #000;
 }
 
-.custom-checkbox {
-  appearance: none;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #999;
-  border-radius: 4px;
-  background-color: #fff;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s;
-}
-
-.custom-checkbox:checked {
-  background-color: #999; /* fondo cuando está seleccionado */
-  border-color: #999;
-}
-
-.custom-checkbox:checked::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 6px;
-  width: 6px;
-  height: 12px;
-  border: solid rgb(0, 0, 0);
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
 
 .airport-input-wrapper {
   position: relative;
