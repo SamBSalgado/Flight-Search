@@ -1,4 +1,4 @@
-/* FlightDetailsPage.css */
+/* FlightDetailsPage.css - Fixed version */
 
 .flight-details-container {
   max-width: 1400px;
@@ -74,9 +74,15 @@
   overflow: hidden;
 }
 
+/* FIX: Añadir aislamiento y posicionamiento limpio para cada segmento */
 .segment-card {
   padding: 24px;
   border-bottom: 1px solid #f3f4f6;
+  position: relative; /* Asegurar contexto de apilamiento */
+  z-index: 1; /* Base z-index */
+  background: white; /* Fondo explícito */
+  /* Crear nuevo contexto de apilamiento para aislar cada segmento */
+  isolation: isolate;
 }
 
 .segment-card:last-child {
@@ -88,10 +94,16 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
+  /* FIX: Asegurar que no haya superposición */
+  position: relative;
+  z-index: 2;
 }
 
 .airline-info {
   flex: 1;
+  /* FIX: Prevenir superposición de texto */
+  min-width: 0; /* Permite que flex funcione correctamente */
+  text-align: left; /* Forzar alineación a la izquierda */
 }
 
 .airline-name {
@@ -99,12 +111,18 @@
   font-weight: 600;
   color: #111827;
   margin-bottom: 4px;
+  /* FIX: Asegurar que el texto no se superponga */
+  line-height: 1.4;
+  word-wrap: break-word;
+  text-align: left; /* Forzar alineación a la izquierda */
 }
 
 .flight-number {
   font-size: 14px;
   color: #6b7280;
   margin-bottom: 4px;
+  line-height: 1.4;
+  text-align: left; /* Forzar alineación a la izquierda */
 }
 
 .operating-carrier {
@@ -112,11 +130,15 @@
   color: #ef4444;
   font-style: italic;
   margin-bottom: 4px;
+  line-height: 1.4;
+  text-align: left; /* Forzar alineación a la izquierda */
 }
 
 .aircraft-type {
   font-size: 12px;
   color: #6b7280;
+  line-height: 1.4;
+  text-align: left; /* Forzar alineación a la izquierda */
 }
 
 .duration-badge {
@@ -126,19 +148,27 @@
   border-radius: 20px;
   font-size: 14px;
   font-weight: 600;
+  /* FIX: Prevenir que se superponga */
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* Flight Timeline */
+/* Flight Timeline - FIX: Mejorar el posicionamiento */
 .flight-timeline {
   display: flex;
   align-items: center;
   margin: 20px 0;
   gap: 20px;
+  /* FIX: Asegurar contexto de apilamiento limpio */
+  position: relative;
+  z-index: 1;
 }
 
 .timeline-point {
   flex: 1;
   text-align: center;
+  /* FIX: Prevenir superposición */
+  min-width: 0;
 }
 
 .timeline-point.departure {
@@ -154,12 +184,14 @@
   font-weight: 700;
   color: #111827;
   margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .terminal {
   font-size: 12px;
   color: #6b7280;
   margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .city-name {
@@ -168,6 +200,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
+  line-height: 1.3;
 }
 
 .time {
@@ -175,19 +208,24 @@
   font-weight: 600;
   color: #111827;
   margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .date {
   font-size: 14px;
   color: #6b7280;
+  line-height: 1.3;
 }
 
+/* FIX: Simplificar timeline-line para evitar problemas de posicionamiento */
 .timeline-line {
   flex: 2;
   position: relative;
   height: 2px;
   background: #e5e7eb;
   margin: 0 20px;
+  /* FIX: Asegurar que no interfiera con otros elementos */
+  align-self: center;
 }
 
 .flight-path {
@@ -196,6 +234,7 @@
   width: 100%;
 }
 
+/* FIX: Mejorar posicionamiento del icono del avión */
 .plane-icon {
   position: absolute;
   top: 50%;
@@ -205,6 +244,10 @@
   padding: 4px 8px;
   border-radius: 12px;
   border: 2px solid #3b82f6;
+  /* FIX: Asegurar z-index apropiado */
+  z-index: 10;
+  /* FIX: Prevenir que el icono interfiera con el texto */
+  pointer-events: none;
 }
 
 /* Fare Details */
@@ -212,6 +255,9 @@
   margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid #f3f4f6;
+  /* FIX: Asegurar contexto de apilamiento */
+  position: relative;
+  z-index: 1;
 }
 
 .fare-details h4 {
@@ -315,6 +361,9 @@
   padding: 16px;
   background: #f8fafc;
   border-radius: 8px;
+  /* FIX: Asegurar que no interfiera con otros elementos */
+  position: relative;
+  z-index: 1;
 }
 
 .layover-info h4 {

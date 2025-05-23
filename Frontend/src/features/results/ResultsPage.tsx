@@ -14,6 +14,7 @@ export const ResultsPage = () => {
   const exchangeRates = useSelector((state: RootState) => state.search.exchangeRates);
   const currentDisplayCurrency = useSelector((state: RootState) => state.search.currentDisplayCurrency);
   const originalCurrency = useSelector((state: RootState) => state.search.originalCurrency);
+  const formData = useSelector((state: RootState) => state.search.formData);
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState<SortOption>('default');
 
@@ -65,6 +66,25 @@ export const ResultsPage = () => {
   // Función para manejar cambio de divisa
   const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     dispatch(setDisplayCurrency(e.target.value));
+  };
+
+  // Función para obtener el número total de pasajeros
+  const getTotalPassengers = () => {
+    const adults = formData?.adults || 1;
+    const children = formData?.children || 0;
+    return adults + children;
+  };
+
+  // Función para obtener la descripción de pasajeros
+  const getPassengerDescription = () => {
+    const adults = formData?.adults || 1;
+    const children = formData?.children || 0;
+    
+    let description = `${adults} adult${adults !== 1 ? 's' : ''}`;
+    if (children > 0) {
+      description += `, ${children} child${children !== 1 ? 'ren' : ''}`;
+    }
+    return description;
   };
 
   // Función para ordenar los resultados (actualizada para usar precios convertidos)
@@ -136,11 +156,31 @@ export const ResultsPage = () => {
     );
   }
 
+  const totalPassengers = getTotalPassengers();
+
   return (
     <div className="results-container">
       <button className="back-button" onClick={() => navigate('/')}>
         ← Return to Search
       </button>
+
+      {/* Información de búsqueda */}
+      <div className="search-summary">
+        <div className="route-summary">
+          {formData?.departureAirport} → {formData?.arrivalAirport}
+        </div>
+        <div className="passengers-summary">
+          {getPassengerDescription()}
+        </div>
+        {formData?.departureDate && (
+          <div className="date-summary">
+            Departure: {new Date(formData.departureDate).toLocaleDateString()}
+            {formData.returnDate && (
+              <span> | Return: {new Date(formData.returnDate).toLocaleDateString()}</span>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Controles de ordenamiento y divisa */}
       <div className="controls-section">
@@ -216,6 +256,9 @@ export const ResultsPage = () => {
             if (stopCount > 1) stopInfo += 's';
           }
 
+          // Calcular precio por pasajero
+          const pricePerPassenger = (parseFloat(convertedPrice) / totalPassengers).toFixed(2);
+
           return (
             <div 
               key={`${index}-${flight.id || index}`} 
@@ -247,9 +290,9 @@ export const ResultsPage = () => {
               <div className="airline-price">
                 <div className="price-section">
                   <div className="total-price">{currentDisplayCurrency} {convertedPrice}</div>
-                  <div className="price-label">total</div>
-                  <div className="per-traveler">{currentDisplayCurrency} {(parseFloat(convertedPrice) / 1).toFixed(2)}</div>
-                  <div className="traveler-label">per Traveler</div>
+                  <div className="price-label">total for {totalPassengers} passenger{totalPassengers !== 1 ? 's' : ''}</div>
+                  <div className="per-traveler">{currentDisplayCurrency} {pricePerPassenger}</div>
+                  <div className="traveler-label">per passenger</div>
                 </div>
               </div>
               

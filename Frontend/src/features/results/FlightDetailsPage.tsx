@@ -2,6 +2,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../app/store";
 import type { FlightOffer } from "../../types/FlightOffer";
+import { convertPrice } from "../search/searchSlice";
 import '../../styles/FlightDetailsPage.css';
 
 export const FlightDetailsPage = () => {
@@ -9,6 +10,9 @@ export const FlightDetailsPage = () => {
   const location = useLocation();
   const { flightIndex } = useParams();
   const results = useSelector((state: RootState) => state.search.results);
+  const exchangeRates = useSelector((state: RootState) => state.search.exchangeRates);
+  const currentDisplayCurrency = useSelector((state: RootState) => state.search.currentDisplayCurrency);
+  const originalCurrency = useSelector((state: RootState) => state.search.originalCurrency);
   
   // Obtener el vuelo desde el state o desde Redux
   const flight: FlightOffer = location.state?.flight || results?.[parseInt(flightIndex || '0')];
@@ -21,6 +25,11 @@ export const FlightDetailsPage = () => {
       </div>
     );
   }
+
+  // Función para convertir precio y mostrarlo
+  const getConvertedPrice = (originalPrice: string) => {
+    return convertPrice(originalPrice, originalCurrency, currentDisplayCurrency, exchangeRates);
+  };
 
   // Funciones helper
   const formatDateTime = (dateTimeString: string) => {
@@ -113,6 +122,11 @@ export const FlightDetailsPage = () => {
   const price = flight.price;
   const isRoundTrip = flight.itineraries.length > 1;
   const totalFees = calculateTotalFees();
+
+  // Convert prices to display currency
+  const convertedBasePrice = getConvertedPrice(price.base);
+  const convertedTotalPrice = getConvertedPrice(price.total);
+  const convertedTotalFees = getConvertedPrice(totalFees.toString());
 
   return (
     <div className="flight-details-container">
@@ -326,14 +340,14 @@ export const FlightDetailsPage = () => {
             <div className="price-details">
               <div className="price-row">
                 <span>Base Price:</span>
-                <span>${price.base} {price.currency}</span>
+                <span>{currentDisplayCurrency} {convertedBasePrice}</span>
               </div>
               
               {price.fees.map((fee, index) => (
                 fee.amount !== "0.00" && (
                   <div key={index} className="price-row">
                     <span>{fee.type} Fee:</span>
-                    <span>${fee.amount} {price.currency}</span>
+                    <span>{currentDisplayCurrency} {getConvertedPrice(fee.amount)}</span>
                   </div>
                 )
               ))}
@@ -341,7 +355,7 @@ export const FlightDetailsPage = () => {
               {totalFees > 0 && (
                 <div className="price-row">
                   <span>Total Fees:</span>
-                  <span>${totalFees.toFixed(2)} {price.currency}</span>
+                  <span>{currentDisplayCurrency} {convertedTotalFees}</span>
                 </div>
               )}
               
@@ -349,13 +363,20 @@ export const FlightDetailsPage = () => {
               
               <div className="price-row total">
                 <span><strong>Total Price:</strong></span>
-                <span><strong>${price.total} {price.currency}</strong></span>
+                <span><strong>{currentDisplayCurrency} {convertedTotalPrice}</strong></span>
               </div>
               
               <div className="price-row">
                 <span>Price per Traveler:</span>
-                <span>${(parseFloat(price.total) / flight.travelerPricings.length).toFixed(2)} {price.currency}</span>
+                <span>{currentDisplayCurrency} {(parseFloat(convertedTotalPrice) / flight.travelerPricings.length).toFixed(2)}</span>
               </div>
+
+              {/* Currency conversion note */}
+              {originalCurrency !== currentDisplayCurrency && (
+                <div className="conversion-note">
+                  <small>*Converted from {originalCurrency}</small>
+                </div>
+              )}
             </div>
 
             <button className="book-button">

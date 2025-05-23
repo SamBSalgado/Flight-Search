@@ -26,7 +26,8 @@ export const SearchForm = () => {
         arrivalAirport: savedFormData.arrivalAirport,
         departureDate: savedFormData.departureDate,
         returnDate: savedFormData.returnDate,
-        adults: savedFormData.adults,
+        adults: savedFormData.adults || 1,
+        children: savedFormData.children || 0,
         currency: savedFormData.currency,
         nonStop: savedFormData.nonStop,
       };
@@ -38,6 +39,7 @@ export const SearchForm = () => {
       departureDate: '',
       returnDate: '',
       adults: 1,
+      children: 0,
       currency: 'USD',
       nonStop: false,
     };
@@ -203,6 +205,29 @@ export const SearchForm = () => {
     });
   };
 
+  // Función específica para manejar cambios en adultos y niños
+  const handlePassengerChange = (type: 'adults' | 'children', operation: 'increment' | 'decrement') => {
+    const currentValue = form[type];
+    let newValue = currentValue;
+
+    if (operation === 'increment') {
+      newValue = currentValue + 1;
+    } else if (operation === 'decrement') {
+      if (type === 'adults') {
+        newValue = Math.max(1, currentValue - 1); // Mínimo 1 adulto
+      } else {
+        newValue = Math.max(0, currentValue - 1); // Mínimo 0 niños
+      }
+    }
+
+    setForm({
+      ...form,
+      [type]: newValue,
+    });
+  };
+
+  // En tu SearchForm.tsx, en la función handleSubmit, reemplaza esta parte:
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -223,10 +248,24 @@ export const SearchForm = () => {
     dispatch(setSearchParams(updatedForm));
 
     try {
+      // Preparar los datos para el backend - mapear currency a currencyCode
+      const backendRequest = {
+        departureAirport: departureQuery,
+        arrivalAirport: arrivalQuery,
+        departureDate: form.departureDate,
+        returnDate: form.returnDate,
+        adults: form.adults,
+        children: form.children,
+        currencyCode: form.currency, // Mapear currency a currencyCode para el backend
+        nonStop: form.nonStop,
+      };
+
+      console.log('Sending request to backend:', backendRequest);
+
       const response = await fetch('http://localhost:8080/buscar-vuelos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedForm),
+        body: JSON.stringify(backendRequest),
       });
       
       const data = await response.json();
@@ -277,6 +316,8 @@ export const SearchForm = () => {
       alert('Error searching flights. Please try again.');
     }
   };
+
+  const getTotalPassengers = () => form.adults + form.children;
 
   return (
     <div className="search-form-container">
@@ -360,6 +401,68 @@ export const SearchForm = () => {
             value={form.returnDate} 
             onChange={handleChange} 
           />
+        </div>
+
+        {/* Sección de Pasajeros */}
+        <div className="form-group passengers-section">
+          <label>Passengers</label>
+          <div className="passengers-controls">
+            <div className="passenger-type">
+              <div className="passenger-info">
+                <span className="passenger-label">Adults</span>
+                <span className="passenger-description">12+ years</span>
+              </div>
+              <div className="counter-controls">
+                <button 
+                  type="button" 
+                  className="counter-btn"
+                  onClick={() => handlePassengerChange('adults', 'decrement')}
+                  disabled={form.adults <= 1}
+                >
+                  -
+                </button>
+                <span className="counter-value">{form.adults}</span>
+                <button 
+                  type="button" 
+                  className="counter-btn"
+                  onClick={() => handlePassengerChange('adults', 'increment')}
+                  disabled={form.adults >= 9}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="passenger-type">
+              <div className="passenger-info">
+                <span className="passenger-label">Children</span>
+                <span className="passenger-description">2-11 years</span>
+              </div>
+              <div className="counter-controls">
+                <button 
+                  type="button" 
+                  className="counter-btn"
+                  onClick={() => handlePassengerChange('children', 'decrement')}
+                  disabled={form.children <= 0}
+                >
+                  -
+                </button>
+                <span className="counter-value">{form.children}</span>
+                <button 
+                  type="button" 
+                  className="counter-btn"
+                  onClick={() => handlePassengerChange('children', 'increment')}
+                  disabled={form.children >= 8}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="passengers-summary">
+              Total: {getTotalPassengers()} passenger{getTotalPassengers() !== 1 ? 's' : ''}
+            </div>
+          </div>
         </div>
 
         <div className="form-group">
