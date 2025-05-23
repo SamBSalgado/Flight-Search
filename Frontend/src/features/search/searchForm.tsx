@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useDispatch } from "react-redux";
-import { setSearchParams, setSearchResults } from "./searchSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setSearchParams, setSearchResults, setFormData } from "./searchSlice";
 import { useNavigate } from "react-router-dom";
+import type { RootState } from "../../app/store";
 import '../../styles/searchForm.css';
 
 interface Airport {
@@ -13,19 +14,54 @@ interface Airport {
 export const SearchForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // Obtener datos del formulario guardados en Redux
+  const savedFormData = useSelector((state: RootState) => state.search.formData);
 
-  const [form, setForm] = useState({
-    departureAirport: 'SFO',
-    arrivalAirport: 'LAX',
-    departureDate: '2025-05-21',
-    returnDate: '2025-06-01',
-    adults: 1,
-    currency: 'USD',
-    nonStop: false,
-  });
+  // Estados iniciales del formulario
+  const getInitialFormData = () => {
+    if (savedFormData) {
+      return {
+        departureAirport: savedFormData.departureAirport,
+        arrivalAirport: savedFormData.arrivalAirport,
+        departureDate: savedFormData.departureDate,
+        returnDate: savedFormData.returnDate,
+        adults: savedFormData.adults,
+        currency: savedFormData.currency,
+        nonStop: savedFormData.nonStop,
+      };
+    }
+    
+    return {
+      departureAirport: '',
+      arrivalAirport: '',
+      departureDate: '',
+      returnDate: '',
+      adults: 1,
+      currency: 'USD',
+      nonStop: false,
+    };
+  };
 
-  const [departureQuery, setDepartureQuery] = useState('SFO');
-  const [arrivalQuery, setArrivalQuery] = useState('LAX');
+  const getInitialQueries = () => {
+    if (savedFormData) {
+      return {
+        departureQuery: savedFormData.departureQuery,
+        arrivalQuery: savedFormData.arrivalQuery,
+      };
+    }
+    
+    return {
+      departureQuery: '',
+      arrivalQuery: '',
+    };
+  };
+
+  const [form, setForm] = useState(getInitialFormData);
+  const initialQueries = getInitialQueries();
+  const [departureQuery, setDepartureQuery] = useState(initialQueries.departureQuery);
+  const [arrivalQuery, setArrivalQuery] = useState(initialQueries.arrivalQuery);
+  
   const [departureSuggestions, setDepartureSuggestions] = useState<Airport[]>([]);
   const [arrivalSuggestions, setArrivalSuggestions] = useState<Airport[]>([]);
   const [showDepartureSuggestions, setShowDepartureSuggestions] = useState(false);
@@ -167,73 +203,80 @@ export const SearchForm = () => {
     });
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  // Actualizar los códigos de aeropuerto en el form antes de enviar
-  const updatedForm = {
-    ...form,
-    departureAirport: departureQuery,
-    arrivalAirport: arrivalQuery,
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Actualizar los códigos de aeropuerto en el form antes de enviar
+    const updatedForm = {
+      ...form,
+      departureAirport: departureQuery,
+      arrivalAirport: arrivalQuery,
+    };
+    
+    // Guardar los datos del formulario en Redux antes de buscar
+    dispatch(setFormData({
+      ...updatedForm,
+      departureQuery,
+      arrivalQuery,
+    }));
+    
+    dispatch(setSearchParams(updatedForm));
+
+    try {
+      const response = await fetch('http://localhost:8080/buscar-vuelos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedForm),
+      });
+      
+      const data = await response.json();
+      
+      // DEBUGGING: Logs para ver qué devuelve el backend
+      console.log('Response from backend:', data);
+      console.log('Type of data:', typeof data);
+      console.log('Is data an array?', Array.isArray(data));
+      console.log('Data keys (if object):', typeof data === 'object' ? Object.keys(data) : 'Not an object');
+
+      // Verificar si la respuesta es exitosa
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Extraer el array de vuelos correctamente según la estructura de tu API
+      let flightResults = [];
+      
+      if (Array.isArray(data)) {
+        // Si data es directamente un array
+        flightResults = data;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        // Si está en data.data
+        flightResults = data.data;
+      } else if (data && data.flights && Array.isArray(data.flights)) {
+        // Si está en data.flights
+        flightResults = data.flights;
+      } else if (data && data.offers && Array.isArray(data.offers)) {
+        // Si está en data.offers
+        flightResults = data.offers;
+      } else {
+        // Si no encontramos un array, usar array vacío
+        console.warn('No flight array found in response, using empty array');
+        flightResults = [];
+      }
+
+      console.log('Final flight results to dispatch:', flightResults);
+      console.log('Number of flights:', flightResults.length);
+
+      dispatch(setSearchResults(flightResults));
+      navigate('/results');
+      
+    } catch (error) {
+      console.error('Error searching flights:', error);
+      // Opcional: dispatch un array vacío en caso de error
+      dispatch(setSearchResults([]));
+      // Opcional: mostrar un mensaje de error al usuario
+      alert('Error searching flights. Please try again.');
+    }
   };
-  
-  dispatch(setSearchParams(updatedForm));
-
-  try {
-    const response = await fetch('http://localhost:8080/buscar-vuelos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedForm),
-    });
-    
-    const data = await response.json();
-    
-    // DEBUGGING: Logs para ver qué devuelve el backend
-    console.log('Response from backend:', data);
-    console.log('Type of data:', typeof data);
-    console.log('Is data an array?', Array.isArray(data));
-    console.log('Data keys (if object):', typeof data === 'object' ? Object.keys(data) : 'Not an object');
-
-    // Verificar si la respuesta es exitosa
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    // Extraer el array de vuelos correctamente según la estructura de tu API
-    let flightResults = [];
-    
-    if (Array.isArray(data)) {
-      // Si data es directamente un array
-      flightResults = data;
-    } else if (data && data.data && Array.isArray(data.data)) {
-      // Si está en data.data
-      flightResults = data.data;
-    } else if (data && data.flights && Array.isArray(data.flights)) {
-      // Si está en data.flights
-      flightResults = data.flights;
-    } else if (data && data.offers && Array.isArray(data.offers)) {
-      // Si está en data.offers
-      flightResults = data.offers;
-    } else {
-      // Si no encontramos un array, usar array vacío
-      console.warn('No flight array found in response, using empty array');
-      flightResults = [];
-    }
-
-    console.log('Final flight results to dispatch:', flightResults);
-    console.log('Number of flights:', flightResults.length);
-
-    dispatch(setSearchResults(flightResults));
-    navigate('/results');
-    
-  } catch (error) {
-    console.error('Error searching flights:', error);
-    // Opcional: dispatch un array vacío en caso de error
-    dispatch(setSearchResults([]));
-    // Opcional: mostrar un mensaje de error al usuario
-    alert('Error searching flights. Please try again.');
-  }
-};
 
   return (
     <div className="search-form-container">
@@ -330,7 +373,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
-              {/* Agrega más si necesitas */}
+              <option value="MXN">MXN</option>
             </select>
             <span className="dropdown-icon">▼</span>
           </div>
