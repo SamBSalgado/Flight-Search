@@ -1,8 +1,12 @@
 # Dockerfile para Frontend React + Vite + TypeScript
-FROM node:18-alpine as builder
+FROM node:18-alpine AS builder
 
 # Establecer directorio de trabajo
 WORKDIR /app
+
+COPY zscaler.crt /usr/local/share/ca-certificates/zscaler.crt
+
+RUN apk add --no-cache ca-certificates && update-ca-certificates
 
 # Copiar package.json y package-lock.json
 COPY package*.json ./
