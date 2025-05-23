@@ -1,5 +1,19 @@
 /* ResultsPage.css */
 
+.route-summary {
+  color: #000;
+  font-weight: bold;
+}
+
+.date-summary {
+  color: #000;
+  font-weight: bold;
+}
+
+#currencySelect {
+  color: #000;
+}
+
 .results-container {
   max-width: 1200px;
   margin: 0 auto;
