@@ -1,0 +1,17 @@
+# Variables de entorno sensibles
+.env
+.env.local
+.env.production
+.env.development
+
+# Archivos de Docker
+.dockerignore
+
+# Directorios de build
+Backend/build/
+Frontend/dist/
+Frontend/node_modules/
+
+# Archivos temporales
+*.log
+*.tmp

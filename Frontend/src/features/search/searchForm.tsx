@@ -95,7 +95,7 @@ export const SearchForm = () => {
         setIsLoadingArrival(true);
       }
 
-      const response = await fetch(`http://localhost:8080/buscar-aero?keyword=${encodeURIComponent(keyword)}`);
+      const response = await fetch(`/api/buscar-aero?keyword=${encodeURIComponent(keyword)}`);
       const data = await response.json();
 
       // Transformar el array de strings en objetos Airport
