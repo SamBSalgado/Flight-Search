@@ -321,6 +321,7 @@ export const SearchForm = () => {
 
   return (
     <div className="search-form-container">
+      <h1 id="title">Flight Search</h1>
       <form onSubmit={handleSubmit} className="flight-search-form">
         <div className="form-group">
           <label htmlFor="departureAirport">Departure Airport</label>
@@ -478,7 +479,7 @@ export const SearchForm = () => {
               <option value="EUR">EUR</option>
               <option value="MXN">MXN</option>
             </select>
-            <span className="dropdown-icon">▼</span>
+            {/* <span className="dropdown-icon">▼</span> */}
           </div>
         </div>
 
@@ -488,7 +489,8 @@ export const SearchForm = () => {
             id="nonStop"
             name="nonStop" 
             checked={form.nonStop} 
-            onChange={handleChange} 
+            onChange={handleChange}
+            className="custom-checkbox"
           />
           <label htmlFor="nonStop">Non-stop</label>
         </div>
