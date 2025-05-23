@@ -4,6 +4,13 @@ FROM openjdk:17-jdk-slim as builder
 # Establecer directorio de trabajo
 WORKDIR /app
 
+COPY zscaler.crt /usr/local/share/ca-certificates/zscaler.crt
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copiar archivos de Gradle
 COPY gradle/ gradle/
 COPY gradlew .
